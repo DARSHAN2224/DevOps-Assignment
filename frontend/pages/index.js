@@ -5,13 +5,18 @@ import axios from 'axios';
 export default function Home() {
   const [message, setMessage] = useState('Loading...');
   const [status, setStatus] = useState('');
+  const [displayUrl, setDisplayUrl] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Set the beautiful display URL for the UI dynamically
+        const urlToDisplay = process.env.NEXT_PUBLIC_API_URL || window.location.origin + '/api';
+        setDisplayUrl(urlToDisplay);
+
         // First check if backend is healthy
         const healthCheck = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/health`);
-        
+
         if (healthCheck.data.status === 'healthy') {
           setStatus('Backend is connected!');
           // Then fetch the message
@@ -46,7 +51,7 @@ export default function Home() {
           <p>{message}</p>
         </div>
         <div className="info">
-          <p>Backend URL: {process.env.NEXT_PUBLIC_API_URL}</p>
+          <p>Backend URL: {displayUrl}</p>
         </div>
       </main>
 
