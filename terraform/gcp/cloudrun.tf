@@ -23,7 +23,7 @@ resource "google_cloud_run_v2_service" "backend" {
     }
 
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder until first deploy
+      image = "ghcr.io/darshan2224/devops-assignment/backend:latest"
       ports {
         container_port = 8000
       }
@@ -34,10 +34,6 @@ resource "google_cloud_run_v2_service" "backend" {
         }
       }
     }
-  }
-
-  lifecycle {
-    ignore_changes = [template[0].containers[0].image]
   }
 }
 
@@ -57,7 +53,7 @@ resource "google_cloud_run_v2_service" "frontend" {
     }
 
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder until first deploy
+      image = "ghcr.io/darshan2224/devops-assignment/frontend:latest"
       ports {
         container_port = 3000
       }
@@ -72,10 +68,6 @@ resource "google_cloud_run_v2_service" "frontend" {
         }
       }
     }
-  }
-
-  lifecycle {
-    ignore_changes = [template[0].containers[0].image]
   }
 }
 
