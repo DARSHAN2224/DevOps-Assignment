@@ -36,7 +36,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ github.repository }}/backend:latest
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/darshan2224/devops-assignment/backend:latest
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-push-frontend:
@@ -66,5 +66,5 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ github.repository }}/frontend:latest
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/darshan2224/devops-assignment/frontend:latest
           labels: ${{ steps.meta.outputs.labels }}
