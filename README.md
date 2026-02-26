@@ -107,14 +107,38 @@ NEXT_PUBLIC_API_URL=https://your-new-backend-url.com
 
    The frontend will be available at `http://localhost:3000`
 
-## Testing the Integration
+## How to Run Locally
 
-1. Ensure both backend and frontend servers are running
-2. Open the frontend in your browser (default: http://localhost:3000)
-3. If everything is working correctly, you should see:
-   - A status message indicating the backend is connected
-   - The message from the backend: "You've successfully integrated the backend!"
-   - The current backend URL being used
+You can run the application locally using Docker Compose, which brings up both the frontend (Next.js) and backend (FastAPI).
+
+```bash
+docker-compose up -d --build
+```
+- Frontend will be available at: `http://localhost:3000`
+- Backend API will be available at: `http://localhost:8000/api/health`
+
+---
+
+## 📦 Mandatory Deliverables Links
+
+### 1. High-Level Architecture Overview
+- **AWS**: An Application Load Balancer routes traffic to highly available EC2 instances running Docker Compose across multiple Availability Zones, managed by an Auto Scaling Group. Securely runs in private subnets with NAT Gateways for egress.
+- **GCP**: Natively secure Cloud Run containers accessed via a Global External HTTP(S) Load Balancer using path-based routing (Serverless NEGs).
+
+### 2. External Documentation
+[Documentation covering all 10 Requirements (Google Docs Equivalent)](./docs/Architecture.md)
+
+### 3. Hosted URLs
+**AWS (EC2 / ALB)**
+- Frontend: `http://YOUR-AWS-ALB-DNS.com`
+- Backend Health: `http://YOUR-AWS-ALB-DNS.com/api/health`
+
+**GCP (Cloud Run / Load Balancer)**
+- Frontend: `http://YOUR-GCP-LB-IP`
+- Backend Health: `http://YOUR-GCP-LB-IP/api/health`
+
+### 4. Demo Video
+[Link to Demo Video Walkthrough](https://youtube.com/YOUR-VIDEO-LINK)
 
 ## API Endpoints
 
