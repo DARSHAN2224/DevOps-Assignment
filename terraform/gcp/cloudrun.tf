@@ -23,7 +23,7 @@ resource "google_cloud_run_v2_service" "backend" {
     }
 
     containers {
-      image = "${var.gcp_region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.ghcr_remote.repository_id}/darshan2224/devops-assignment/backend:latest"
+      image = "${var.gcp_region}-docker.pkg.dev/${var.project_id}/app-repo/backend:latest"
       ports {
         container_port = 8000
       }
@@ -53,7 +53,7 @@ resource "google_cloud_run_v2_service" "frontend" {
     }
 
     containers {
-      image = "${var.gcp_region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.ghcr_remote.repository_id}/darshan2224/devops-assignment/frontend:latest"
+      image = "${var.gcp_region}-docker.pkg.dev/${var.project_id}/app-repo/frontend:latest"
       ports {
         container_port = 3000
       }

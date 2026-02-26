@@ -105,7 +105,7 @@ This is your live AWS link!
 4. Run these terminal commands to authenticate your local machine:
    ```bash
    gcloud auth login
-   gcloud config set project big-genre-462604-k5 
+   gcloud config set project devops-488609
 
    gcloud auth application-default login
    ```
@@ -129,18 +129,23 @@ GCP state is stored in a Google Cloud Storage (GCS) bucket.
    ```
 4. Open `terraform/gcp/environments/dev.tfvars` and update the `project_id` variable with your actual GCP Project ID.
 
-### Step 4.4: Cache Your Docker Images in GCP
-Google Cloud Run cannot natively pull images directly from GitHub. Our Terraform creates an **Artifact Registry Remote Repository** to proxy GHCR, but it needs the images cached first! 
-Run these commands in your terminal to authenticate Docker to GCP and trigger the cache:
+### Step 4.4: Build and Push Images to GCP Artifact Registry
+Google Cloud requires images to be stored in its native Artifact Registry. Run these commands from the root directory of the project:
 ```bash
-# 1. Authenticate local Docker to GCP Artifact Registry
+# 1. Create a Docker repository in your GCP project
+gcloud artifacts repositories create app-repo --repository-format=docker --location=us-central1
+
+# 2. Configure Docker authentication
 gcloud auth configure-docker us-central1-docker.pkg.dev
 
-# 2. Pull your images directly through the GCP proxy to cache them
-docker pull us-central1-docker.pkg.dev/YOUR-GCP-PROJECT-ID/ghcr-remote-dev/darshan2224/devops-assignment/backend:latest
-docker pull us-central1-docker.pkg.dev/YOUR-GCP-PROJECT-ID/ghcr-remote-dev/darshan2224/devops-assignment/frontend:latest
+# 3. Build and Push the Backend
+docker build -t us-central1-docker.pkg.dev/devops-488609/app-repo/backend:latest ./backend
+docker push us-central1-docker.pkg.dev/devops-488609/app-repo/backend:latest
+
+# 4. Build and Push the Frontend
+docker build -t us-central1-docker.pkg.dev/devops-488609/app-repo/frontend:latest ./frontend
+docker push us-central1-docker.pkg.dev/devops-488609/app-repo/frontend:latest
 ```
-*(Crucial: Replace `YOUR-GCP-PROJECT-ID` with your actual project ID before running those pulls!)*
 
 ### Step 4.5: Deploy GCP Infrastructure!
 Run the following commands:
