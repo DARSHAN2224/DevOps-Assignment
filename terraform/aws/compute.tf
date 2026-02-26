@@ -61,8 +61,8 @@ resource "aws_launch_template" "app" {
               DOCKERCOMPOSE
 
               cd /app
-              docker-compose pull
-              docker-compose up -d
+              /usr/local/bin/docker-compose pull
+              /usr/local/bin/docker-compose up -d
               EOF
   )
 
