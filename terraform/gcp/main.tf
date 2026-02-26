@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket  = "YOUR_GCP_GCS_TERRAFORM_STATE_BUCKET"
+    bucket  = "tf-state-devops-488609"
     prefix  = "terraform/state"
   }
 }
