@@ -62,17 +62,17 @@ Before the infrastructure can run, it needs the application code! We set up GitH
 State must be safely stored in an S3 bucket with a DynamoDB lock table.
 1. Run this command to create the bucket (replace `YOUR-UNIQUE-NAME` with something random like `darshan-tf-state-123`):
    ```bash
-   aws s3api create-bucket --bucket YOUR-UNIQUE-NAME --region us-east-1
+   aws s3api create-bucket --bucket darshan-devops-tf-state-123 --region us-east-1
    ```
 2. Run this command to create the lock table:
    ```bash
-   aws dynamodb create-table --table-name devops-tf-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --billing-mode PAY_PER_REQUEST --region us-east-1
+   aws dynamodb create-table --table-name darshan-devops-tf-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --billing-mode PAY_PER_REQUEST --region us-east-1
    ```
 3. Open `terraform/aws/main.tf` in your code editor.
 4. Update lines 10 and 14 with the names you just created:
    ```hcl
-   bucket         = "YOUR-UNIQUE-NAME"
-   dynamodb_table = "devops-tf-lock"
+   bucket         = "darshan-devops-tf-state-123"
+   dynamodb_table = "darshan-devops-tf-lock"
    ```
 
 ### Step 3.3: Deploy AWS Infrastructure!
@@ -105,7 +105,8 @@ This is your live AWS link!
 4. Run these terminal commands to authenticate your local machine:
    ```bash
    gcloud auth login
-   gcloud config set project YOUR-GCP-PROJECT-ID
+   gcloud config set project big-genre-462604-k5 
+
    gcloud auth application-default login
    ```
 
@@ -119,16 +120,29 @@ gcloud services enable compute.googleapis.com run.googleapis.com iam.googleapis.
 GCP state is stored in a Google Cloud Storage (GCS) bucket.
 1. Create a globally unique bucket (replace `YOUR-UNIQUE-NAME` like `darshan-gcp-tf-state-123`):
    ```bash
-   gcloud storage buckets create gs://YOUR-UNIQUE-NAME --location=us-central1
+   gcloud storage buckets create gs://darshan-gcp-tf-state-123 --location=us-central1
    ```
 2. Open `terraform/gcp/main.tf` in your code editor.
 3. Update line 10 with your bucket name:
    ```hcl
-   bucket  = "YOUR-UNIQUE-NAME"
+   bucket  = "darshan-gcp-tf-state-123"
    ```
 4. Open `terraform/gcp/environments/dev.tfvars` and update the `project_id` variable with your actual GCP Project ID.
 
-### Step 4.4: Deploy GCP Infrastructure!
+### Step 4.4: Cache Your Docker Images in GCP
+Google Cloud Run cannot natively pull images directly from GitHub. Our Terraform creates an **Artifact Registry Remote Repository** to proxy GHCR, but it needs the images cached first! 
+Run these commands in your terminal to authenticate Docker to GCP and trigger the cache:
+```bash
+# 1. Authenticate local Docker to GCP Artifact Registry
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+# 2. Pull your images directly through the GCP proxy to cache them
+docker pull us-central1-docker.pkg.dev/YOUR-GCP-PROJECT-ID/ghcr-remote-dev/darshan2224/devops-assignment/backend:latest
+docker pull us-central1-docker.pkg.dev/YOUR-GCP-PROJECT-ID/ghcr-remote-dev/darshan2224/devops-assignment/frontend:latest
+```
+*(Crucial: Replace `YOUR-GCP-PROJECT-ID` with your actual project ID before running those pulls!)*
+
+### Step 4.5: Deploy GCP Infrastructure!
 Run the following commands:
 ```bash
 # Go up to base directory, then into GCP
