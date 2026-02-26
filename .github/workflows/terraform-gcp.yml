@@ -1,0 +1,46 @@
+name: Terraform GCP Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (dev, staging, prod)'
+        required: true
+        default: 'dev'
+
+jobs:
+  terraform:
+    name: "Terraform Apply GCP"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # For Workload Identity Federation
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: '${{ secrets.GCP_WIF_PROVIDER }}' # e.g. projects/123/locations/global/workloadIdentityPools/github/providers/github
+          service_account: '${{ secrets.GCP_SA_EMAIL }}'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform/gcp
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.GCP_GCS_TF_STATE_BUCKET }}" \
+            -backend-config="prefix=${{ github.event.inputs.environment }}/state"
+
+      - name: Terraform Plan
+        working-directory: ./terraform/gcp
+        run: terraform plan -var-file="environments/${{ github.event.inputs.environment }}.tfvars"
+
+      - name: Terraform Apply
+        working-directory: ./terraform/gcp
+        run: terraform apply -auto-approve -var-file="environments/${{ github.event.inputs.environment }}.tfvars"
