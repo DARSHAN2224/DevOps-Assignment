@@ -120,6 +120,19 @@ Used **Terraform** explicitly across the board.
 - **Secret Storage**: No hardcoded credentials. Passwords/Tokens are stored in GitHub Secrets.
 - **Least-privilege**: 
     - EC2 runs an Instance Profile restricting it purely to SSM (AWS Systems Manager) for operator SSH access. It has no access to modify its environment.
+        - *Example Restricted Policy*:
+          ```json
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": ["ssm:UpdateInstanceInformation", "ssmmessages:CreateControlChannel", "ssmmessages:CreateDataChannel", "ssmmessages:OpenControlChannel", "ssmmessages:OpenDataChannel"],
+                "Resource": "*"
+              }
+            ]
+          }
+          ```
     - GCP Cloud Run uses a dedicated, scoped `cloudrun-sa` rather than the permissive Compute Engine default service account.
 
 ---
@@ -139,8 +152,11 @@ Used **Terraform** explicitly across the board.
 - Infinite crash loops in code updates (requires developer to revert commit).
 
 **Alerting Philosophy**: "Actionable alerts only". 
-- 2 AM Page: "Prod Application Load Balancer returning > 5% 5xx errors".
-- Slack Notification: "Dev instance rebooted".
+- **Monitoring Stack Definitions**:
+    - **AWS CloudWatch**: Configured an alarm to trigger if ALB 5xx errors exceed 5% over a 5-minute rolling window, or if ASG average CPU utilization exceeds 80% for 10 minutes. 
+    - **GCP Cloud Monitoring**: Alerts defined on Cloud Run metric `run.googleapis.com/container/memory/utilizations` exceeding 90%.
+- **Log Retention**: CloudWatch Logs and GCP Cloud Logging are strictly configured for a 30-day retention period to balance auditability with storage costs. Metrics are retained for 15 months (AWS standard) to allow for year-over-year operational analysis.
+- **Alert Channels**: Urgent alerts (like the 5xx threshold) page on-call via PagerDuty/Slack. Informational alerts route to a low-priority Email digest.
 
 ---
 
@@ -155,6 +171,22 @@ Used **Terraform** explicitly across the board.
 - **Early decisions**: 
     - *Helpful*: Using the ALB/Global LB as ingress was brilliant because routing a new backend service just means adding an ALB rule for `/api/v2/*` pointing to a new target group.
     - *Painful*: The current AWS "User-Data Docker Compose" setup hurts because scaling frontend scaling independently from backend scaling isn't possible, wasting compute.
+
+---
+
+## 11. Cost Awareness & Estimations (Bonus)
+
+Understanding the financial impact of the architecture is equally as critical as the technical design. The following are estimated monthly run rates based on the environment sizing:
+
+**AWS Cost Estimates:**
+- **Dev**: ~$40/month (1x t3.micro, Application Load Balancer base hourly charge, NAT Gateway baseline).
+- **Prod**: ~$200/month (3x m5.large spreading across AZs, higher NAT data processing, ALB traffic bandwidth).
+
+**GCP Cost Estimates:**
+- **Dev**: ~$10/month (Cloud Run scales to 0, minimal compute time charged, Global HTTP Load Balancer bare minimum).
+- **Prod**: ~$150/month (Cloud Run configured with minimum instances to prevent cold-starts, higher concurrency throughput, load balancer bandwidth).
+
+*Note: GCP inherently models cheaper for dev environments because Cloud Run can scale completely to zero, whereas AWS EC2 requires at least one permanently running VM to serve the ALB.*
 
 ---
 
